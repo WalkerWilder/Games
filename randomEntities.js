@@ -1,7 +1,7 @@
 const fs = require('fs')
 let arr = [];
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 50000; i++) {
   const elements = 1;
   let components = [];
   for (let j = 0; j < elements; j++) {
@@ -19,8 +19,8 @@ for (let i = 0; i < 100; i++) {
     });
   }
 
-  let x = Math.round(2000 * Math.random());
-  let y = Math.round(2000 * Math.random());
+  let x = Math.round(50000 * Math.random());
+  let y = Math.round(50000 * Math.random());
 
   x = (Math.random() > 0.5) ? x * -1 : x;
   y = (Math.random() > 0.5) ? y * -1 : y;

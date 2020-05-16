@@ -96,7 +96,7 @@ class Circle {
   getBorders(entityPosition, step) {
     const borders = {};
     for (let a = 0; a < 360; a += step) {
-      borders[a] = _rotate(entityPosition, { x: entityPosition.x + this.size, y: entityPosition.y }, ((2 * Math.PI) / 360) * a);
+      borders[a] = _rotate(entityPosition, { x: entityPosition.x + this.size, y: entityPosition.y }, ((Math.PI * 2) / 360) * a);
     };
     return borders;
   }
@@ -140,11 +140,11 @@ class Creature extends Entity {
 class Player extends Creature {
   constructor(position) {
     var components = {
-      maod: new Component(shapes.circle, 15, colors.green, { x: 55, y: -70 }, { visual: true }),
-      maoe: new Component(shapes.circle, 15, colors.green, { x: -55, y: -70 }, { visual: true }),
-      ombd: new Component(shapes.circle, 50, colors.green, { x: 50, y: 6 }),
-      ombe: new Component(shapes.circle, 50, colors.green, { x: -50, y: 6 }),
-      main: new Component(shapes.circle, 70, colors.blue, { x: 0, y: 0 })
+      maod: new Component(shapes.circle, 10, colors.green, { x: 35, y: -40 }, { visual: true }),
+      maoe: new Component(shapes.circle, 10, colors.green, { x: -35, y: -40 }, { visual: true }),
+      ombd: new Component(shapes.circle, 25, colors.green, { x: 30, y: 2 }),
+      ombe: new Component(shapes.circle, 25, colors.green, { x: -30, y: 2 }),
+      main: new Component(shapes.circle, 40, colors.blue, { x: 0, y: 0 })
     };
 
     super(components, position, 0);

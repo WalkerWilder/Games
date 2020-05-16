@@ -9,7 +9,7 @@ class Renderer {
     this.drawHitPoints = false;
     this.hitPointsAngle = 18;
     this.hitPointsDistance = 100;
-    this.nChunks = 3
+    this.nChunks = 4;
   }
 
   _drawDot(position, pointOfView = { x: 0, y: 0 }, size = 5, color = colors.red) {
@@ -36,7 +36,7 @@ class Renderer {
     const r = size;
     this._context.beginPath();
     this._context.fillStyle = color;
-    this._context.arc(x, y, r, 0, 2 * Math.PI, false);
+    this._context.arc(x, y, r, 0, Math.PI * 2, false);
     this._context.fill();
   }
 

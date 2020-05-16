@@ -19,7 +19,7 @@ class Game {
             { x: c.x_off, y: c.y_off }, { visual: c.v })
         );
       }
-      this.addEntity(new Building(components, { x: w.x, y: w.y }, (Math.PI * 2) / w.rotation));
+      this.addEntity(new Building(components, { x: w.x, y: w.y }, ((Math.PI * 2) / 360) * w.rotation));
     }
 
     this.run();
