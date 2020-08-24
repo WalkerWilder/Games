@@ -7,8 +7,11 @@ const shapes = {
 const colors = {
   black: 'black',
   blue: 'blue',
-  gray: 'gray',
+  darkGrey: '#626262',
+  darkGreen: 'darkgreen',
+  grey: 'gray',
   green: 'green',
+  lightBlue: '#428aa2',
   red: 'red'
 }
 

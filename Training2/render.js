@@ -1,15 +1,18 @@
 class Renderer {
-  constructor() {
+  constructor(configs) {
+    this.configs = configs;
+
     this._container = document.getElementById('container')
     this._canvas = document.getElementById('game');
     this._canvas.width = this._container.clientWidth;
     this._canvas.height = this._container.offsetHeight;
     this._context = this._canvas.getContext('2d');
     this._context.translate(this._canvas.width / 2, this._canvas.height / 2);
-    this.drawHitPoints = false;
-    this.hitPointsAngle = 18;
-    this.hitPointsDistance = 100;
-    this.nChunks = 4;
+    this.drawHitPoints = this.configs.get('drawHitPoints');
+    this.hitPointsAngle = this.configs.get('hitpointsAngle');
+    this.hitPointsDistance = this.configs.get('hitpointsDistance');
+    this.nChunks = this.configs.get('RenderNChunks');
+    this.chunkSize = this.configs.get('chunkSize');
   }
 
   _drawDot(position, pointOfView = { x: 0, y: 0 }, size = 5, color = colors.red) {
@@ -98,29 +101,48 @@ class Renderer {
     }
   }
 
-  _render() {
+  _render(player, chunks, creatures) {
     this._context.fillStyle = 'black';
     this._context.fillRect(-(this._canvas.width / 2), -(this._canvas.height / 2), this._canvas.width, this._canvas.height);
 
-    const player = game._player;
-    player.move();
+    // player.move();
     const playerPosition = player.position;
-    this._drawComplex(player, { x: 0, y: 0 });
 
-    const chunk = { x: Math.floor(playerPosition.x / 300), y: Math.floor(playerPosition.y / 300) };
+    const layers = {};
+
+    layers[0] = [];
+    layers[0].push({ entity: player, pointOfView: { x: 0, y: 0 } });
+    layers[-1] = []; // Walls
+    layers[1] = []; // Monsters
+
+    const chunk = { x: Math.floor(playerPosition.x / this.chunkSize), y: Math.floor(playerPosition.y / this.chunkSize) };
 
     const nChunks = this.nChunks;
     for (let x = chunk.x - nChunks; x <= chunk.x + nChunks; x++) {
-      if (typeof game._chunks[x] !== 'undefined' && game._chunks[x].length > 0) {
-        for (let y = chunk.y - nChunks; y <= chunk.y + nChunks; y++) {
-          if (typeof game._chunks[x][y] !== 'undefined' && game._chunks[x][y].length > 0) {
-            const buildings = game._chunks[x][y];
-            for (let i = 0; i < buildings.length; i++) {
-              const building = buildings[i];
-              this._drawComplex(building, playerPosition);
-            }
+      for (let y = chunk.y - nChunks; y <= chunk.y + nChunks; y++) {
+        if (typeof chunks[`${x}|${y}`] !== 'undefined' && chunks[`${x}|${y}`].length > 0) {
+          const buildings = chunks[`${x}|${y}`];
+          for (let i = 0; i < buildings.length; i++) {
+            const building = buildings[i];
+            layers[-1].push({ entity: building, pointOfView: playerPosition });
           }
         }
+      }
+    }
+
+    for (let i = 0; i < creatures.length; i++) {
+      const creature = creatures[i];
+      if (!(creature instanceof Player)) {
+        layers[1].push({ entity: creature, pointOfView: playerPosition });
+      }
+    }
+
+    for (let i = -1; i <= 1; i++) {
+      const layer = layers[i];
+      if (typeof layer == 'undefined' || layer.length == 0) continue;
+      for (let j = 0; j < layer.length; j++) {
+        const drawing = layer[j];
+        this._drawComplex(drawing.entity, drawing.pointOfView);
       }
     }
   }

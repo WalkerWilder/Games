@@ -1,6 +1,9 @@
 class Control {
-  constructor() {
-    game.keys = {
+  constructor(configs, player, orchestrator) {
+    this.configs = configs;
+    this.player = player;
+    this.orchestrator = orchestrator;
+    this.keys = {
       38: 'up',
       87: 'up',
       40: 'down',
@@ -9,34 +12,34 @@ class Control {
       65: 'left',
       39: 'right',
       68: 'right'
-    }
-    document.body.addEventListener('keydown', this.keyDown);
-    document.body.addEventListener('keyup', this.keyUp);
-    document.body.addEventListener('mousemove', this.moveView);
+    };
+    this.configs.set('keys', this.keys);
+
+    document.body.addEventListener('keydown', (e) => this.keyDown(e));
+    document.body.addEventListener('keyup', (e) => this.keyUp(e));
+    document.body.addEventListener('mousemove', (e) => this.moveView(e));
   }
 
   keyDown(e) {
     const comm = e.which || e.keyCode;
 
-    if (typeof game.keys[comm] !== 'undefined') {
+    if (typeof this.keys[comm] !== 'undefined') {
       e.preventDefault();
-      game._player.start(game.keys[comm]);
+      this.orchestrator.action('startAction', this.player, this.keys[comm]);
     }
   }
   keyUp(e) {
     const comm = e.which || e.keyCode;
-
-    if (typeof game.keys[comm] !== 'undefined') {
+    
+    if (typeof this.keys[comm] !== 'undefined') {
       e.preventDefault();
-      game._player.stop(game.keys[comm]);
+      this.orchestrator.action('stopAction', this.player, this.keys[comm]);
     }
   }
-
+  
   moveView(m) {
     let x = m.offsetX;
     let y = m.offsetY;
-    game._player.lookAt({ x, y });
+    this.orchestrator.action('lookAt', this.player, { x, y });
   }
 }
-
-const control = new Control()

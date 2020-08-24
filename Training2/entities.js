@@ -18,8 +18,8 @@ class Rectangle {
       x: position.x - (this.size.w / 2),
       y: position.y - (this.size.h / 2)
     };
-
   }
+
   getCorners(entityPosition, rotation) {
     const { x, y } = entityPosition;
     const { w, h } = this.size;
@@ -127,6 +127,7 @@ class Entity {
     this.components = components;
     this.position = position;
     this.rotation = rotation;
+    this.facing = { x: 0, y: 0 };
   }
 
   getComponents() {
@@ -140,24 +141,20 @@ class Creature extends Entity {
 class Player extends Creature {
   constructor(position) {
     var components = {
-      maod: new Component(shapes.circle, 10, colors.green, { x: 35, y: -40 }, { visual: true }),
-      maoe: new Component(shapes.circle, 10, colors.green, { x: -35, y: -40 }, { visual: true }),
-      ombd: new Component(shapes.circle, 25, colors.green, { x: 30, y: 2 }),
-      ombe: new Component(shapes.circle, 25, colors.green, { x: -30, y: 2 }),
+      maod: new Component(shapes.circle, 10, colors.lightBlue, { x: 35, y: -40 }, { visual: true }),
+      maoe: new Component(shapes.circle, 10, colors.lightBlue, { x: -35, y: -40 }, { visual: true }),
+      ombd: new Component(shapes.circle, 25, colors.lightBlue, { x: 30, y: 2 }),
+      ombe: new Component(shapes.circle, 25, colors.lightBlue, { x: -30, y: 2 }),
       main: new Component(shapes.circle, 40, colors.blue, { x: 0, y: 0 })
     };
 
     super(components, position, 0);
-
+    this.facing = { x: 0, y: 0 };
     this.speed = 10;
   }
 
   lookAt(position) {
-    const midY = game._renderer._canvas.offsetTop + (game._renderer._container.offsetHeight / 2)
-    const midX = game._renderer._canvas.offsetLeft + (game._renderer._container.clientWidth / 2);
-    const preRotation = this.rotation;
-    this.rotation = Math.atan2(position.y - midY, position.x - midX) + Math.PI / 2;
-    if (physics.checkMovementCollision(this, { x: 0, y: 0 })) this.rotation = preRotation;
+    this.facing = position;
   }
 
   start(action) {
@@ -192,32 +189,27 @@ class Player extends Creature {
         break;
     }
   }
-  move() {
-    if (!this.moveUp && !this.moveDown && !this.moveLeft && !this.moveRight) return;
-    let steps = this.speed;
-    while (steps > 0) {
-      const movement = { x: 0, y: 0 };
-      if (this.moveUp) {
-        movement.y -= 1;
-        steps--;
-      }
-      if (this.moveDown) {
-        movement.y += 1;
-        steps--;
-      }
-      if (this.moveLeft) {
-        movement.x -= 1;
-        steps--;
-      }
-      if (this.moveRight) {
-        movement.x += 1;
-        steps--;
-      }
-      if (!physics.checkMovementCollision(this, movement)) {
-        this.position.x += movement.x;
-        this.position.y += movement.y;
-      }
-    }
+  movement() {
+    return ({ moveUp: this.moveUp, moveDown: this.moveDown, moveLeft: this.moveLeft, moveRight: this.moveRight });
+  }
+}
+
+class Enemy extends Creature {
+}
+
+class Zombie extends Enemy {
+  constructor(position) {
+    var components = {
+      maod: new Component(shapes.circle, 10, colors.darkGreen, { x: 35, y: -40 }, { visual: true }),
+      maoe: new Component(shapes.circle, 10, colors.darkGreen, { x: -35, y: -40 }, { visual: true }),
+      ombd: new Component(shapes.circle, 25, colors.darkGreen, { x: 30, y: 2 }),
+      ombe: new Component(shapes.circle, 25, colors.darkGreen, { x: -30, y: 2 }),
+      main: new Component(shapes.circle, 40, colors.darkGrey, { x: 0, y: 0 })
+    };
+
+    super(components, position, 0);
+
+    this.speed = 2;
   }
 }
 

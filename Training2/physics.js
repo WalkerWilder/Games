@@ -1,7 +1,10 @@
 class Physics {
-  constructor() {
-    this.hitPointsAngle = 18;
-    this.nChunks = 1
+  constructor(configs) {
+    this.configs = configs;
+
+    this.hitPointsAngle = configs.get('hitpointsAngle');
+    this.nChunks = configs.get('physicsNChunks');
+    this.chunkSize = configs.get('chunkSize');
   }
   checkMovementCollision(entity, movement) {
     const entityPosition = entity.position;
@@ -29,33 +32,31 @@ class Physics {
 
   checkCollisionA(elDestination, size) {
     const nChunks = this.nChunks;
-    const chunk = { x: Math.floor(elDestination.x / 300), y: Math.floor(elDestination.y / 300) };
+    const chunk = { x: Math.floor(elDestination.x / this.chunkSize), y: Math.floor(elDestination.y / this.chunkSize) };
     for (let x = chunk.x - nChunks; x <= chunk.x + nChunks; x++) {
-      if (typeof game._chunks[x] !== 'undefined' && game._chunks[x].length > 0) {
-        for (let y = chunk.y - nChunks; y <= chunk.y + nChunks; y++) {
-          if (typeof game._chunks[x][y] !== 'undefined' && game._chunks[x][y].length > 0) {
-            const buildings = game._chunks[x][y];
-            for (let i = 0; i < buildings.length; i++) {
-              const building = buildings[i];
-              const walls = building.getComponents();
-              for (const part in walls) {
-                if (walls.hasOwnProperty(part)) {
-                  const wall = walls[part];
-                  if (wall.visual) continue;
-                  const position = wall.self.getPosition(building.position, building.rotation);
+      for (let y = chunk.y - nChunks; y <= chunk.y + nChunks; y++) {
+        if (typeof game._orchestrator._chunks[`${x}|${y}`] !== 'undefined' && game._orchestrator._chunks[`${x}|${y}`].length > 0) {
+          const buildings = game._orchestrator._chunks[`${x}|${y}`];
+          for (let i = 0; i < buildings.length; i++) {
+            const building = buildings[i];
+            const walls = building.getComponents();
+            for (const part in walls) {
+              if (walls.hasOwnProperty(part)) {
+                const wall = walls[part];
+                if (wall.visual) continue;
+                const position = wall.self.getPosition(building.position, building.rotation);
 
-                  const corners = wall.self.getCorners(position, building.rotation);
-                  for (const c in corners) {
-                    if (corners.hasOwnProperty(c)) {
-                      const corner = corners[c];
-                      if (pointIsInsideCircle(corner, { position: elDestination, r: size })) return true;
-                    }
+                const corners = wall.self.getCorners(position, building.rotation);
+                for (const c in corners) {
+                  if (corners.hasOwnProperty(c)) {
+                    const corner = corners[c];
+                    if (pointIsInsideCircle(corner, { position: elDestination, r: size })) return true;
                   }
                 }
               }
             }
-
           }
+
         }
       }
     }
@@ -67,40 +68,38 @@ class Physics {
     for (const b in borders) {
       if (borders.hasOwnProperty(b)) {
         const border = borders[b];
-        const chunk = { x: Math.floor(border.x / 300), y: Math.floor(border.y / 300) };
+        const chunk = { x: Math.floor(border.x / this.chunkSize), y: Math.floor(border.y / this.chunkSize) };
         for (let x = chunk.x - nChunks; x <= chunk.x + nChunks; x++) {
-          if (typeof game._chunks[x] !== 'undefined' && game._chunks[x].length > 0) {
-            for (let y = chunk.y - nChunks; y <= chunk.y + nChunks; y++) {
-              if (typeof game._chunks[x][y] !== 'undefined' && game._chunks[x][y].length > 0) {
-                const buildings = game._chunks[x][y];
+          for (let y = chunk.y - nChunks; y <= chunk.y + nChunks; y++) {
+            if (typeof game._orchestrator._chunks[`${x}|${y}`] !== 'undefined' && game._orchestrator._chunks[`${x}|${y}`].length > 0) {
+              const buildings = game._orchestrator._chunks[`${x}|${y}`];
 
-                for (let i = 0; i < buildings.length; i++) {
-                  const building = buildings[i];
-                  const walls = building.getComponents();
-                  for (const part in walls) {
-                    if (walls.hasOwnProperty(part)) {
-                      const wall = walls[part];
-                      if (wall.visual) continue;
-                      const position = wall.self.getPosition(building.position, building.rotation);
+              for (let i = 0; i < buildings.length; i++) {
+                const building = buildings[i];
+                const walls = building.getComponents();
+                for (const part in walls) {
+                  if (walls.hasOwnProperty(part)) {
+                    const wall = walls[part];
+                    if (wall.visual) continue;
+                    const position = wall.self.getPosition(building.position, building.rotation);
 
-                      const corners = wall.self.getCorners(position, building.rotation);
-                      const { tl, tr, dl, dr } = corners;
-                      const rectArea = (
-                        getTriangleArea(position, tl, tr) +
-                        getTriangleArea(position, tl, dl) +
-                        getTriangleArea(position, dl, dr) +
-                        getTriangleArea(position, dr, tr)
-                      )
+                    const corners = wall.self.getCorners(position, building.rotation);
+                    const { tl, tr, dl, dr } = corners;
+                    const rectArea = (
+                      getTriangleArea(position, tl, tr) +
+                      getTriangleArea(position, tl, dl) +
+                      getTriangleArea(position, dl, dr) +
+                      getTriangleArea(position, dr, tr)
+                    )
 
-                      const check = (
-                        getTriangleArea(border, tl, tr) +
-                        getTriangleArea(border, tl, dl) +
-                        getTriangleArea(border, dl, dr) +
-                        getTriangleArea(border, dr, tr)
-                      )
+                    const check = (
+                      getTriangleArea(border, tl, tr) +
+                      getTriangleArea(border, tl, dl) +
+                      getTriangleArea(border, dl, dr) +
+                      getTriangleArea(border, dr, tr)
+                    )
 
-                      if (rectArea >= check) return true;
-                    }
+                    if (rectArea >= check) return true;
                   }
                 }
               }
@@ -112,5 +111,3 @@ class Physics {
     return false;
   }
 }
-
-physics = new Physics();
